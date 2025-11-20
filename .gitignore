@@ -1,0 +1,30 @@
+# Dependencies
+/node_modules
+/vendor
+
+# Build artifacts
+/public/.vite
+*.log
+
+# Ignore all generated CSS/JS build files, but keep stable `app.css` and `app.js`
+# Ignore everything in public css/js directories
+/public/css/*
+/public/js/*
+# Except these stable files we want to commit
+!/public/css/app.css
+!/public/js/app.js
+
+# Development files
+package-lock.json
+composer.lock
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

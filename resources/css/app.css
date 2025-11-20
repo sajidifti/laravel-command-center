@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Configure dark mode to use class-based selector instead of media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Theme customization can go here */
+}
