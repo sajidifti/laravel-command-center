@@ -33,11 +33,17 @@ Then run the installation command:
 php artisan command-center:install
 ```
 
-This will:
+The installer will guide you through an interactive setup process, asking you to:
 
-- Publish the configuration file to `config/command-center.php`
-- Publish compiled assets to `public/vendor/laravel-command-center/`
-- Display setup instructions
+- Publish configuration file (default: Yes)
+- Publish compiled assets (default: Yes)
+- Add environment variables to `.env` and `.env.example` (default: Yes)
+
+For each environment variable, you'll be prompted with secure defaults:
+- **Route Prefix**: Includes a randomly generated secret path
+- **Username**: Default is `admin`
+- **Password**: Randomly generated 16-character password
+- **Session Lifetime**: Default is `120` minutes
 
 ### Option 2: Install for Local Development
 
@@ -85,63 +91,97 @@ composer require sajidifti/laravel-command-center @dev
 php artisan command-center:install
 ```
 
-### Step 3: Configure Environment
+### Accessing the Command Center
 
-Add these variables to your `.env` file:
+After installation, the command will display your access URL. Navigate to the route prefix you configured (e.g., `https://yourdomain.com/command-center/somesecret`) and login with the credentials you set during installation.
 
-```env
-# Laravel Command Center Configuration
-LARAVEL_COMMAND_CENTER_ROUTE_PREFIX=command-center/secret
-LARAVEL_COMMAND_CENTER_USERNAME=admin
-LARAVEL_COMMAND_CENTER_PASSWORD=your-secure-password
-LARAVEL_COMMAND_CENTER_SESSION_LIFETIME=120
-```
-
-**Important:** Change `LARAVEL_COMMAND_CENTER_ROUTE_PREFIX` to something hard to guess for security!
-
-### Step 4: Access the Command Center
-
-Navigate to: `https://yourdomain.com/command-center/secret` (or your custom prefix)
+**Security Note:** Your route prefix includes a random secret path for security. Keep this URL private and use HTTPS in production.
 
 ## Available Commands
 
 ### `command-center:install`
 
-Installs the Laravel Command Center by publishing configuration and optionally publishing assets.
+Interactive installation wizard that guides you through setting up the Laravel Command Center.
+
+#### Interactive Mode (Default)
+
+Simply run the command and answer the prompts:
 
 ```bash
-# Install with assets (recommended)
-php artisan command-center:install --with-assets
-
-# Install without assets (config only)
 php artisan command-center:install
 ```
 
-**What it does**:
+You'll be asked:
+1. **Publish configuration file?** (yes/no) [yes]
+2. **Publish compiled assets (CSS/JS)?** (yes/no) [yes]
+3. **Add environment variables to .env (and .env.example)?** (yes/no) [yes]
 
-- Publishes `config/command-center.php`
-- Publishes compiled CSS/JS to `public/vendor/laravel-command-center/` when run with `--with-assets`
-- Displays next steps and access URL
+If you choose to add environment variables, you'll be prompted for:
+- **Route Prefix**: Default includes a random secret (e.g., `command-center/somesecret`)
+- **Username**: Default is `admin`
+- **Password**: Hidden input, defaults to a random 16-character string
+- **Session Lifetime**: Default is `120` minutes
 
-### `command-center:publish-assets`
+#### Flag-Based Mode
 
-Force publishes the compiled frontend assets, overwriting any existing files. Useful when updating the package or if assets are corrupted.
+Skip interactive prompts by using flags:
 
 ```bash
-php artisan command-center:publish-assets
+# Publish only configuration
+php artisan command-center:install --with-config
+
+# Publish only assets
+php artisan command-center:install --with-assets
+
+# Only add environment variables
+php artisan command-center:install --with-env
+
+# Combine multiple flags
+php artisan command-center:install --with-config --with-assets --with-env
 ```
 
-**What it does**:
+#### Complete Mode (Non-Interactive)
 
-- Force copies `public/css/app.css` to `public/vendor/laravel-command-center/css/app.css`
-- Force copies `public/js/app.js` to `public/vendor/laravel-command-center/js/app.js`
-- Always overwrites existing files (no confirmation needed)
+For automated deployments or CI/CD pipelines:
 
-**When to use**:
+```bash
+php artisan command-center:install --complete
+```
 
-- After updating the package to get latest UI changes
-- If assets are missing or corrupted
-- After rebuilding assets during development
+This will:
+- Publish configuration file
+- Publish compiled assets
+- Add environment variables with secure random defaults
+- No user interaction required
+
+#### What Happens When You Skip Steps
+
+If you answer "no" to any step, the installer will show you manual instructions:
+
+**Skipped Config:**
+```
+⚠ Configuration not published
+To publish the configuration file manually, run:
+  php artisan vendor:publish --tag=command-center-config
+```
+
+**Skipped Assets:**
+```
+⚠ Assets not published
+To publish the compiled assets manually, run:
+  php artisan vendor:publish --tag=command-center-assets
+```
+
+**Skipped Environment Variables:**
+```
+⚠ Environment variables not added
+Add the following keys to your .env file:
+
+  LARAVEL_COMMAND_CENTER_ROUTE_PREFIX=command-center/your-secret-path
+  LARAVEL_COMMAND_CENTER_USERNAME=admin
+  LARAVEL_COMMAND_CENTER_PASSWORD=your-secure-password
+  LARAVEL_COMMAND_CENTER_SESSION_LIFETIME=120
+```
 
 ### `command-center:clean-sessions`
 
@@ -153,7 +193,7 @@ php artisan command-center:clean-sessions
 
 **What it does**:
 
-- Scans `storage/framework/command_center_sessions/`
+- Scans `storage/framework/management_sessions/`
 - Removes expired session files
 - Reports number of sessions cleaned
 
@@ -165,7 +205,7 @@ php artisan command-center:clean-sessions
 
 ### Manual Publishing (Advanced)
 
-You can also manually publish specific components:
+You can also manually publish specific components using Laravel's vendor:publish command:
 
 ```bash
 # Publish only configuration
@@ -220,7 +260,7 @@ return [
 
 ### Accessing the Command Center
 
-1. Navigate to your configured route prefix (e.g., `https://yourdomain.com/command-center/secret`)
+1. Navigate to your configured route prefix (e.g., `https://yourdomain.com/command-center/somesecret`)
 2. Login with credentials from `.env`
 3. Use the interface to manage your application
 
@@ -260,7 +300,7 @@ return [
 
 The Laravel Command Center is completely independent of your application's database:
 
-1. **File-Based Sessions**: Uses its own session storage in `storage/framework/command_center_sessions/`
+1. **File-Based Sessions**: Uses its own session storage in `storage/framework/management_sessions/`
 2. **No Web Middleware**: Bypasses Laravel's database-dependent middleware
 3. **Standalone Routes**: Loads without web middleware group
 4. **No Database Queries**: Authentication uses .env, not database
@@ -278,7 +318,7 @@ The Laravel Command Center is completely independent of your application's datab
 
 - PHP 8.2 or higher
 - Laravel 11.x or 12.x
-- Write permissions for `storage/framework/command_center_sessions/`
+- Write permissions for `storage/framework/management_sessions/`
 
 ## Prebuilt Assets
 
@@ -289,7 +329,7 @@ This package ships with prebuilt Tailwind CSS v4 in the `public` directory, so c
 If you need to modify the frontend and rebuild the assets, the package includes a Vite + Tailwind v4 build setup. From the package root run:
 
 ```bash
-cd packages/sajidifti/laravel-command-center
+cd packages/sajidifti/laravel-command-center # or cd vendor/sajidifti/laravel-command-center
 npm install
 npm run build
 ```
@@ -297,7 +337,9 @@ npm run build
 The build writes compiled JS/CSS into the package `public` directory. After building, publish the package assets into your application with:
 
 ```bash
-php artisan command-center:publish-assets
+php artisan command-center:install --with-assets
+# Or use Laravel's vendor:publish command
+php artisan vendor:publish --tag=command-center-assets --force
 ```
 
 **Notes**:
@@ -313,7 +355,7 @@ php artisan command-center:publish-assets
 
 1. Check that route prefix is correct in `.env`
 2. Clear config cache: `php artisan config:clear`
-3. Verify storage permissions: `storage/framework/command_center_sessions/` needs to be writable
+3. Verify storage permissions: `storage/framework/management_sessions/` needs to be writable
 
 ### Session Issues
 
@@ -325,8 +367,11 @@ php artisan command-center:clean-sessions
 ### Assets Not Loading
 
 ```bash
-# Force republish assets
-php artisan command-center:publish-assets
+# Republish assets using the install command
+php artisan command-center:install --with-assets
+
+# Or use vendor:publish with force flag
+php artisan vendor:publish --tag=command-center-assets --force
 ```
 
 ### Cannot Access During Database Outage

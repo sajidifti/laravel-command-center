@@ -46,7 +46,6 @@ class LaravelCommandCenterServiceProvider extends ServiceProvider
         $this->commands([
             Console\InstallCommand::class,
             Console\CleanSessionsCommand::class,
-            Console\PublishAssetsCommand::class,
         ]);
 
         // Register middleware
