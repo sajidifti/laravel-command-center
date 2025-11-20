@@ -34,6 +34,7 @@ php artisan command-center:install
 ```
 
 This will:
+
 - Publish the configuration file to `config/command-center.php`
 - Publish compiled assets to `public/vendor/laravel-command-center/`
 - Display setup instructions
@@ -110,15 +111,16 @@ Installs the Laravel Command Center by publishing configuration and optionally p
 
 ```bash
 # Install with assets (recommended)
-php artisan command-center:install
+php artisan command-center:install --with-assets
 
 # Install without assets (config only)
-php artisan command-center:install --no-assets
+php artisan command-center:install
 ```
 
 **What it does**:
+
 - Publishes `config/command-center.php`
-- Publishes compiled CSS/JS to `public/vendor/laravel-command-center/` (if `--no-assets` not specified)
+- Publishes compiled CSS/JS to `public/vendor/laravel-command-center/` when run with `--with-assets`
 - Displays next steps and access URL
 
 ### `command-center:publish-assets`
@@ -130,11 +132,13 @@ php artisan command-center:publish-assets
 ```
 
 **What it does**:
+
 - Force copies `public/css/app.css` to `public/vendor/laravel-command-center/css/app.css`
 - Force copies `public/js/app.js` to `public/vendor/laravel-command-center/js/app.js`
 - Always overwrites existing files (no confirmation needed)
 
 **When to use**:
+
 - After updating the package to get latest UI changes
 - If assets are missing or corrupted
 - After rebuilding assets during development
@@ -148,11 +152,13 @@ php artisan command-center:clean-sessions
 ```
 
 **What it does**:
+
 - Scans `storage/framework/command_center_sessions/`
 - Removes expired session files
 - Reports number of sessions cleaned
 
 **When to use**:
+
 - Periodically to free up disk space
 - If experiencing session-related issues
 - Can be added to Laravel's scheduler for automatic cleanup
@@ -295,6 +301,7 @@ php artisan command-center:publish-assets
 ```
 
 **Notes**:
+
 - The package `package.json` and build config are intended for package maintainers
 - Built assets should be committed to the package `public` folder so consumers don't need a build step
 - The build outputs are placed in `public/js` and `public/css` inside the package
@@ -369,8 +376,6 @@ Schedule::command('command-center:clean-sessions')->daily();
 1. **Change Default Route**: Use a unique, hard-to-guess route prefix
 2. **Strong Credentials**: Use strong username and password
 3. **HTTPS Only**: Always use HTTPS in production
-4. **IP Whitelist**: Consider adding IP restrictions
-5. **Regular Audits**: Monitor access logs
 
 ## Contributing
 
@@ -378,11 +383,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Please see [License File](LICENSE) for more information.
 
 ## Credits
 
-- [Sajid Ifti](https://github.com/sajidifti)
+- [Md. Sajid Anam Ifti](https://github.com/sajidifti)
 - [All Contributors](../../contributors)
 
 ## Support
