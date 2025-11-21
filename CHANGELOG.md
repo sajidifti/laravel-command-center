@@ -2,6 +2,41 @@
 
 All notable changes to `laravel-command-center` will be documented in this file.
 
+## 1.2.0 - 2025-11-21
+
+### Added
+
+- **Blade Icons Integration**: Added icon support throughout the UI for better visual experience
+- **Configurable System Information**: System info settings moved from hardcoded values to config file
+- **Configurable Commands**: Allowed commands now fully configurable via config file
+- **Configurable Environment Groups**: Environment variable groups now customizable in config
+
+### Changed
+
+- **Install Command Improvements**:
+  - Changed flags from `--with-*` to `--only-*` for better clarity
+  - Renamed `--complete` flag to `--full` for consistency
+  - `--only-*` flags are now mutually exclusive (install only specific components)
+  - Improved flag behavior and documentation
+- **Configuration Architecture**: Moved hardcoded settings to `config/command-center.php` for better flexibility
+- **UI/UX Enhancements**:
+  - Design improvements across all pages
+  - Better visual hierarchy and spacing
+  - Enhanced icon usage with Blade Icons
+  - Improved responsive design
+
+### Fixed
+
+- Better separation of concerns between hardcoded and configurable settings
+- Improved configuration validation and defaults
+
+### Documentation
+
+- Updated README to reflect new `--only-*` and `--full` flags
+- Added note about mutually exclusive `--only-*` flags
+- Updated all command examples throughout documentation
+- Clarified installation modes and their use cases
+
 ## 1.1.0 - 2025-11-21
 
 ### Added
