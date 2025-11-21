@@ -121,38 +121,6 @@ class CommandCenterController extends Controller
     }
 
     /**
-     * Execute storage:unlink command
-     */
-    public function unlinkStorage(Request $request)
-    {
-        try {
-            $publicPath = public_path('storage');
-
-            if (is_link($publicPath)) {
-                unlink($publicPath);
-                $output = 'The [public/storage] directory has been unlinked.';
-                $success = true;
-            } elseif (is_dir($publicPath)) {
-                $output = 'The [public/storage] directory exists but is not a symbolic link. Please remove it manually.';
-                $success = false;
-            } else {
-                $output = 'The [public/storage] symbolic link does not exist.';
-                $success = false;
-            }
-
-            return response()->json([
-                'success' => $success,
-                'output' => $output,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'output' => 'Error: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
      * Get system information
      */
     public function getSystemInfo()

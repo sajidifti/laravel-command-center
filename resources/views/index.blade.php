@@ -371,7 +371,7 @@
                             <span
                                 class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">storage:link</span>
                         </button>
-                        <button onclick="unlinkStorage()"
+                        <button onclick="executeCommand('storage:unlink')"
                             class="w-full text-left px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded transition-colors group">
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Remove Storage
                                 Link</span>
@@ -691,29 +691,33 @@
                 // Show maintenance mode message overlay
                 const $overlay = $('<div>').attr('id', 'maintenance-overlay').addClass(
                     'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50');
+
+                const bypassDisplay = window.lastMaintenanceSecret ?
+                    '{{ url('/') }}' + '/' + window.lastMaintenanceSecret :
+                    'Loading...';
+
                 $overlay.html(`
-            <div class="bg-white rounded-lg shadow-xl p-8 max-w-md mx-4 text-center">
-                <div class="text-6xl mb-4">🔧</div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Application is in Maintenance Mode</h2>
-                <p class="text-gray-600 mb-6">The main application is currently down for maintenance. However, you can still access it using the bypass URL.</p>
-                <div class="bg-gray-100 rounded-lg p-4 mb-4">
-                    <p class="text-sm text-gray-700 font-mono break-all" id="bypass-url-display">` + (window
-                    .lastMaintenanceSecret ? '{{ url('/') }}' + '/' + window.lastMaintenanceSecret : 'Loading...'
-                ) + `</p>
-                </div>
-                <div class="flex space-x-2">
-                    <button onclick="copyBypassUrl()" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm">
-                        📋 Copy URL
-                    </button>
-                    <button onclick="goToBypassUrl()" class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm">
-                        🔗 Go to App
-                    </button>
-                </div>
-                <button onclick="$('#maintenance-overlay').remove()" class="mt-4 text-sm text-gray-500 hover:text-gray-700">
-                    Close
-                </button>
-            </div>
-        `);
+                    <div class="bg-white rounded-lg shadow-xl p-8 max-w-md mx-4 text-center">
+                        <div class="text-6xl mb-4">🔧</div>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Application is in Maintenance Mode</h2>
+                        <p class="text-gray-600 mb-6">The main application is currently down for maintenance. However, you can still access it using the bypass URL.</p>
+                        <div class="bg-gray-100 rounded-lg p-4 mb-4">
+                            <p class="text-sm text-gray-700 font-mono break-all" id="bypass-url-display">${bypassDisplay}</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="copyBypassUrl()" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm">
+                                📋 Copy URL
+                            </button>
+                            <button onclick="goToBypassUrl()" class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm">
+                                🔗 Go to App
+                            </button>
+                        </div>
+                        <button onclick="$('#maintenance-overlay').remove()" class="mt-4 text-sm text-gray-500 hover:text-gray-700">
+                            Close
+                        </button>
+                    </div>
+                `);
+
                 $('body').append($overlay);
 
                 // Update bypass URL if available
@@ -765,11 +769,11 @@
             function loadEnvSettings() {
                 const $container = $('#env-settings-container');
                 $container.html(`
-            <div class="flex items-center justify-center py-8">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span class="ml-3 text-gray-500">Loading settings...</span>
-            </div>
-        `);
+                    <div class="flex items-center justify-center py-8">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span class="ml-3 text-gray-500">Loading settings...</span>
+                    </div>
+                `);
 
                 $.ajax({
                     url: "{{ route('command-center.env-settings') }}",
@@ -826,13 +830,13 @@
                     if (!settings[category]) return;
 
                     html += `
-                <div class="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                    <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
-                        <span class="mr-2">${categories[category].icon}</span>
-                        ${categories[category].title}
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            `;
+                        <div class="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                            <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+                                <span class="mr-2">${categories[category].icon}</span>
+                                ${categories[category].title}
+                            </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    `;
 
                     Object.keys(settings[category]).forEach(key => {
                         const value = settings[category][key] || '';
@@ -840,23 +844,23 @@
                         const inputType = isPassword ? 'password' : 'text';
 
                         html += `
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${key}</label>
-                        <input 
-                            type="${inputType}"
-                            id="${key}"
-                            value="${escapeHtml(String(value))}"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
-                            ${isPassword ? 'placeholder="••••••••"' : ''}
-                        >
-                    </div>
-                `;
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${key}</label>
+                                <input 
+                                    type="${inputType}"
+                                    id="${key}"
+                                    value="${escapeHtml(String(value))}"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
+                                    ${isPassword ? 'placeholder="••••••••"' : ''}
+                                >
+                            </div>
+                        `;
                     });
 
                     html += `
-                    </div>
-                </div>
-            `;
+                            </div>
+                        </div>
+                    `;
                 });
 
                 html += '</div>';
@@ -1017,49 +1021,6 @@
                     appendOutput('');
                     $button.prop('disabled', false);
                     $button.removeClass('opacity-50 cursor-not-allowed');
-                });
-            }
-
-            function unlinkStorage() {
-                appendOutput(
-                    `<span class="text-yellow-600 dark:text-yellow-400">[${getCurrentTime()}]</span> <span class="text-blue-600 dark:text-blue-400">Executing:</span> Remove storage link`
-                );
-                appendOutput(
-                    `<span class="text-gray-400 dark:text-gray-500">───────────────────────────────────────────────</span>`);
-
-                $.ajax({
-                    url: "{{ route('command-center.unlink-storage') }}",
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        if (data.success) {
-                            appendOutput(
-                                `<span class="text-gray-700 dark:text-green-400">${escapeHtml(data.output)}</span>`
-                            );
-                            appendOutput(
-                                `<span class="text-green-600 dark:text-green-500">[${getCurrentTime()}]</span> <span class="text-green-600 dark:text-green-400">✓ Command completed successfully</span>`
-                            );
-                        } else {
-                            appendOutput(
-                                `<span class="text-yellow-700 dark:text-yellow-400">${escapeHtml(data.output)}</span>`
-                            );
-                            appendOutput(
-                                `<span class="text-yellow-600 dark:text-yellow-500">[${getCurrentTime()}]</span> <span class="text-yellow-600 dark:text-yellow-400">⚠ Command completed with warnings</span>`
-                            );
-                        }
-                        appendOutput('');
-                    },
-                    error: function(error) {
-                        appendOutput(`<span class="text-red-600 dark:text-red-400">Error: ${error.message}</span>`);
-                        appendOutput(
-                            `<span class="text-red-600 dark:text-red-500">[${getCurrentTime()}]</span> <span class="text-red-600 dark:text-red-400">✗ Request failed</span>`
-                        );
-                        appendOutput('');
-                    }
                 });
             }
 

@@ -66,6 +66,7 @@ return [
         'migrate:status',
         'db:seed',
         'storage:link',
+        'storage:unlink',
         'queue:restart',
         'command-center:clean-sessions',
     ],

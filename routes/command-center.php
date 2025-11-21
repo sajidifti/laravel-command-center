@@ -25,7 +25,6 @@ Route::prefix($prefix)
             
             // System operations
             Route::post('/execute-command', [CommandCenterController::class, 'executeCommand'])->name('command-center.execute-command');
-            Route::post('/unlink-storage', [CommandCenterController::class, 'unlinkStorage'])->name('command-center.unlink-storage');
             Route::get('/system-info', [CommandCenterController::class, 'getSystemInfo'])->name('command-center.system-info');
             
             // Environment management
