@@ -42,11 +42,175 @@ return [
 
     /*
      * |--------------------------------------------------------------------------
+     * | Command Sections
+     * |--------------------------------------------------------------------------
+     * |
+     * | Structured command sections for the management panel UI. Each section
+     * | contains metadata and a list of commands with their details.
+     * |
+     */
+    'command_sections' => [
+        [
+            'name' => 'Optimization Commands',
+            'icon' => 'heroicon-o-bolt',
+            'color' => 'blue',
+            'commands' => [
+                [
+                    'title' => 'Optimize Application',
+                    'description' => 'optimize',
+                    'command' => 'optimize',
+                    'color' => 'blue',
+                ],
+                [
+                    'title' => 'Clear Optimizations',
+                    'description' => 'optimize:clear',
+                    'command' => 'optimize:clear',
+                    'color' => 'blue',
+                ],
+                [
+                    'title' => 'Cache Config',
+                    'description' => 'config:cache',
+                    'command' => 'config:cache',
+                    'color' => 'green',
+                ],
+                [
+                    'title' => 'Cache Routes',
+                    'description' => 'route:cache',
+                    'command' => 'route:cache',
+                    'color' => 'green',
+                ],
+                [
+                    'title' => 'Cache Views',
+                    'description' => 'view:cache',
+                    'command' => 'view:cache',
+                    'color' => 'green',
+                ],
+            ],
+        ],
+        [
+            'name' => 'Clear Cache Commands',
+            'icon' => 'heroicon-o-trash',
+            'color' => 'red',
+            'commands' => [
+                [
+                    'title' => 'Clear Application Cache',
+                    'description' => 'cache:clear',
+                    'command' => 'cache:clear',
+                    'color' => 'red',
+                ],
+                [
+                    'title' => 'Clear Config Cache',
+                    'description' => 'config:clear',
+                    'command' => 'config:clear',
+                    'color' => 'red',
+                ],
+                [
+                    'title' => 'Clear Route Cache',
+                    'description' => 'route:clear',
+                    'command' => 'route:clear',
+                    'color' => 'red',
+                ],
+                [
+                    'title' => 'Clear Compiled Views',
+                    'description' => 'view:clear',
+                    'command' => 'view:clear',
+                    'color' => 'red',
+                ],
+            ],
+        ],
+        [
+            'name' => 'Database Commands',
+            'icon' => 'heroicon-o-circle-stack',
+            'color' => 'purple',
+            'commands' => [
+                [
+                    'title' => 'Run Migrations',
+                    'description' => 'migrate',
+                    'command' => 'migrate',
+                    'color' => 'purple',
+                ],
+                [
+                    'title' => 'Migration Status',
+                    'description' => 'migrate:status',
+                    'command' => 'migrate:status',
+                    'color' => 'purple',
+                ],
+                [
+                    'title' => 'Fresh Migration ⚠️',
+                    'description' => 'migrate:fresh',
+                    'command' => 'migrate:fresh',
+                    'color' => 'yellow',
+                    'confirmation' => 'This will drop all tables and re-run migrations. Continue?',
+                ],
+                [
+                    'title' => 'Fresh Migration + Seed ⚠️',
+                    'description' => 'migrate:fresh --seed',
+                    'command' => 'migrate:fresh --seed',
+                    'color' => 'yellow',
+                    'confirmation' => 'This will drop all tables, re-run migrations, and seed the database. Continue?',
+                ],
+                [
+                    'title' => 'Rollback Migration',
+                    'description' => 'migrate:rollback',
+                    'command' => 'migrate:rollback',
+                    'color' => 'orange',
+                    'confirmation' => 'Rollback the last batch of migrations?',
+                ],
+                [
+                    'title' => 'Run Database Seeder',
+                    'description' => 'db:seed',
+                    'command' => 'db:seed',
+                    'color' => 'purple',
+                ],
+            ],
+        ],
+        [
+            'name' => 'Other Commands',
+            'icon' => 'heroicon-o-cog-6-tooth',
+            'color' => 'indigo',
+            'commands' => [
+                [
+                    'title' => 'Create Storage Link',
+                    'description' => 'storage:link',
+                    'command' => 'storage:link',
+                    'color' => 'indigo',
+                ],
+                [
+                    'title' => 'Remove Storage Link',
+                    'description' => 'storage:unlink',
+                    'command' => 'storage:unlink',
+                    'color' => 'indigo',
+                ],
+                [
+                    'title' => 'Restart Queue Workers',
+                    'description' => 'queue:restart',
+                    'command' => 'queue:restart',
+                    'color' => 'indigo',
+                ],
+            ],
+        ],
+        [
+            'name' => 'Command Center Commands',
+            'icon' => 'heroicon-o-command-line',
+            'color' => 'red',
+            'commands' => [
+                [
+                    'title' => 'Clean Expired Sessions',
+                    'description' => 'command-center:clean-sessions',
+                    'command' => 'command-center:clean-sessions',
+                    'color' => 'red',
+                ],
+            ],
+        ],
+    ],
+
+    /*
+     * |--------------------------------------------------------------------------
      * | Allowed Artisan Commands
      * |--------------------------------------------------------------------------
      * |
      * | List of artisan commands that can be executed through the management
-     * | panel for security purposes.
+     * | panel for security purposes. This is used for validation.
      * |
      */
     'allowed_commands' => [

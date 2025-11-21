@@ -5,7 +5,6 @@ namespace Sajidifti\LaravelCommandCenter\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Artisan;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\Output;
 
 class CommandCenterController extends Controller
@@ -15,7 +14,11 @@ class CommandCenterController extends Controller
      */
     public function index()
     {
-        return view('laravel-command-center::index');
+        $commandSections = config('command-center.command_sections', []);
+        
+        return view('laravel-command-center::index', [
+            'commandSections' => $commandSections,
+        ]);
     }
 
     /**
@@ -28,26 +31,7 @@ class CommandCenterController extends Controller
         ]);
 
         $command = $request->input('command');
-        $allowedCommands = config('command-center.allowed_commands', [
-            'optimize',
-            'optimize:clear',
-            'cache:clear',
-            'config:clear',
-            'route:clear',
-            'view:clear',
-            'config:cache',
-            'route:cache',
-            'view:cache',
-            'migrate',
-            'migrate:fresh',
-            'migrate:fresh --seed',
-            'migrate:rollback',
-            'migrate:status',
-            'db:seed',
-            'storage:link',
-            'queue:restart',
-            'command-center:clean-sessions',
-        ]);
+        $allowedCommands = config('command-center.allowed_commands', []);
 
         // Check if command is allowed
         if (!in_array($command, $allowedCommands)) {

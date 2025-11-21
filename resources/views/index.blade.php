@@ -202,212 +202,29 @@
         <div class="relative">
             <div id="commands-container" class="space-y-4 overflow-y-scroll rounded-lg"
                 style="max-height: calc(100vh - 300px); scrollbar-width: none; -ms-overflow-style: none;">
-                <!-- Optimization Commands -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                    <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                        Optimization Commands
-                    </h2>
-                    <div class="space-y-1">
-                        <button onclick="executeCommand('optimize')"
-                            class="w-full text-left px-3 py-2 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Optimize
-                                Application</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">optimize</span>
-                        </button>
-                        <button onclick="executeCommand('optimize:clear')"
-                            class="w-full text-left px-3 py-2 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Clear
-                                Optimizations</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">optimize:clear</span>
-                        </button>
-                        <button onclick="executeCommand('config:cache')"
-                            class="w-full text-left px-3 py-2 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Cache Config</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">config:cache</span>
-                        </button>
-                        <button onclick="executeCommand('route:cache')"
-                            class="w-full text-left px-3 py-2 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Cache Routes</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">route:cache</span>
-                        </button>
-                        <button onclick="executeCommand('view:cache')"
-                            class="w-full text-left px-3 py-2 bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Cache Views</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">view:cache</span>
-                        </button>
+                @foreach ($commandSections as $section)
+                    <!-- {{ $section['name'] }} -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+                        <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                            <x-dynamic-component :component="$section['icon']" class="w-5 h-5 mr-2 text-{{ $section['color'] }}-600" />
+                            {{ $section['name'] }}
+                        </h2>
+                        <div class="space-y-1">
+                            @foreach ($section['commands'] as $cmd)
+                                <button
+                                    @if (isset($cmd['confirmation'])) onclick="if(confirm('{{ $cmd['confirmation'] }}')) executeCommand('{{ $cmd['command'] }}')"
+                                    @else
+                                        onclick="executeCommand('{{ $cmd['command'] }}')" @endif
+                                    class="w-full text-left px-3 py-2 bg-{{ $cmd['color'] }}-50 dark:bg-{{ $cmd['color'] }}-900/30 hover:bg-{{ $cmd['color'] }}-100 dark:hover:bg-{{ $cmd['color'] }}-900/50 rounded transition-colors group">
+                                    <span
+                                        class="text-sm font-medium text-gray-700 dark:text-gray-200 block">{{ $cmd['title'] }}</span>
+                                    <span
+                                        class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">{{ $cmd['description'] }}</span>
+                                </button>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
-
-                <!-- Clear Cache Commands -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                    <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                            </path>
-                        </svg>
-                        Clear Cache Commands
-                    </h2>
-                    <div class="space-y-1">
-                        <button onclick="executeCommand('cache:clear')"
-                            class="w-full text-left px-3 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Clear Application
-                                Cache</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">cache:clear</span>
-                        </button>
-                        <button onclick="executeCommand('config:clear')"
-                            class="w-full text-left px-3 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Clear Config
-                                Cache</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">config:clear</span>
-                        </button>
-                        <button onclick="executeCommand('route:clear')"
-                            class="w-full text-left px-3 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Clear Route
-                                Cache</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">route:clear</span>
-                        </button>
-                        <button onclick="executeCommand('view:clear')"
-                            class="w-full text-left px-3 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Clear Compiled
-                                Views</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">view:clear</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Database Commands -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                    <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4">
-                            </path>
-                        </svg>
-                        Database Commands
-                    </h2>
-                    <div class="space-y-1">
-                        <button onclick="executeCommand('migrate')"
-                            class="w-full text-left px-3 py-2 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Run Migrations</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">migrate</span>
-                        </button>
-                        <button onclick="executeCommand('migrate:status')"
-                            class="w-full text-left px-3 py-2 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Migration
-                                Status</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">migrate:status</span>
-                        </button>
-                        <button
-                            onclick="if(confirm('This will drop all tables and re-run migrations. Continue?')) executeCommand('migrate:fresh')"
-                            class="w-full text-left px-3 py-2 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Fresh Migration
-                                ⚠️</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">migrate:fresh</span>
-                        </button>
-                        <button
-                            onclick="if(confirm('This will drop all tables, re-run migrations, and seed the database. Continue?')) executeCommand('migrate:fresh --seed')"
-                            class="w-full text-left px-3 py-2 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Fresh Migration + Seed
-                                ⚠️</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">migrate:fresh
-                                --seed</span>
-                        </button>
-                        <button
-                            onclick="if(confirm('Rollback the last batch of migrations?')) executeCommand('migrate:rollback')"
-                            class="w-full text-left px-3 py-2 bg-orange-50 dark:bg-orange-900/30 hover:bg-orange-100 dark:hover:bg-orange-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Rollback
-                                Migration</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">migrate:rollback</span>
-                        </button>
-                        <button onclick="executeCommand('db:seed')"
-                            class="w-full text-left px-3 py-2 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Run Database
-                                Seeder</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">db:seed</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Other Commands -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                    <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Other Commands
-                    </h2>
-                    <div class="space-y-1">
-                        <button onclick="executeCommand('storage:link')"
-                            class="w-full text-left px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Create Storage
-                                Link</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">storage:link</span>
-                        </button>
-                        <button onclick="executeCommand('storage:unlink')"
-                            class="w-full text-left px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Remove Storage
-                                Link</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">storage:unlink</span>
-                        </button>
-                        <button onclick="executeCommand('queue:restart')"
-                            class="w-full text-left px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Restart Queue
-                                Workers</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">queue:restart</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Command Center Commands -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                    <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                            </path>
-                        </svg>
-                        Command Center Commands
-                    </h2>
-                    <div class="space-y-1">
-                        <button onclick="executeCommand('command-center:clean-sessions')"
-                            class="w-full text-left px-3 py-2 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors group">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200 block">Clean Expired
-                                Sessions</span>
-                            <span
-                                class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300">command-center:clean-sessions</span>
-                        </button>
-                    </div>
-                </div>
+                @endforeach
             </div>
             <!-- Custom Scrollbar -->
             <div id="commands-scrollbar"
