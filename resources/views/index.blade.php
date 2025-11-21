@@ -65,7 +65,7 @@
                     Generate
                 </button>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">💡 Tip: Use the generate button for a secure random
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Note: Use the generate button for a secure random
                 token</p>
             <div class="flex justify-end space-x-2">
                 <button onclick="closeSecretModal()"
@@ -124,7 +124,7 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
+    <!-- Generic Confirmation Modal -->
     <div id="confirmation-modal" style="display: none;"
         class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-60">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
@@ -137,18 +137,19 @@
                         </path>
                     </svg>
                 </div>
-                <h3 class="ml-4 text-lg font-semibold text-gray-800 dark:text-gray-100">Confirm Changes</h3>
+                <h3 id="confirmation-modal-title" class="ml-4 text-lg font-semibold text-gray-800 dark:text-gray-100">
+                    Confirm Action</h3>
             </div>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Are you sure you want to update environment settings?
-                This will modify your .env file and may affect your application's behavior.</p>
+            <p id="confirmation-modal-message" class="text-sm text-gray-600 dark:text-gray-400 mb-6">Are you sure you want
+                to proceed?</p>
             <div class="flex justify-end space-x-2">
                 <button onclick="closeConfirmationModal()"
                     class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm">
                     Cancel
                 </button>
-                <button onclick="confirmSaveEnvSettings()"
+                <button id="confirmation-modal-confirm-btn" onclick="confirmAction()"
                     class="px-4 py-2 bg-orange-600 dark:bg-orange-700 text-white rounded-lg hover:bg-orange-700 dark:hover:bg-orange-800 transition-colors text-sm">
-                    Yes, Update Settings
+                    Yes
                 </button>
             </div>
         </div>
@@ -192,7 +193,7 @@
                         <div class="space-y-1">
                             @foreach ($section['commands'] as $cmd)
                                 <button
-                                    @if (isset($cmd['confirmation'])) onclick="if(confirm('{{ $cmd['confirmation'] }}')) executeCommand('{{ $cmd['command'] }}')"
+                                    @if (isset($cmd['confirmation'])) onclick="showConfirmation('{{ addslashes($cmd['confirmation']) }}', () => executeCommand('{{ $cmd['command'] }}'))"
                                     @else
                                         onclick="executeCommand('{{ $cmd['command'] }}')" @endif
                                     class="w-full text-left px-3 py-2 bg-{{ $cmd['color'] }}-50 dark:bg-{{ $cmd['color'] }}-900/30 hover:bg-{{ $cmd['color'] }}-100 dark:hover:bg-{{ $cmd['color'] }}-900/50 rounded transition-colors group">
@@ -532,18 +533,35 @@
                 }
             }
 
-            function showNotification(message, type) {
+            function showNotification(message, type = 'success') {
                 const $notification = $('<div>').text(message);
                 if (type === 'success') {
                     $notification.addClass(
-                        'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in');
-                } else {
+                        'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in flex items-center gap-2'
+                    );
+                    $notification.prepend(
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                    );
+                } else if (type === 'error') {
                     $notification.addClass(
-                        'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in');
+                        'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in flex items-center gap-2'
+                    );
+                    $notification.prepend(
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'
+                    );
+                } else if (type === 'warning') {
+                    $notification.addClass(
+                        'fixed top-4 right-4 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in flex items-center gap-2'
+                    );
+                    $notification.prepend(
+                        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>'
+                    );
                 }
                 $('body').append($notification);
                 setTimeout(() => {
-                    $notification.remove();
+                    $notification.fadeOut(300, function() {
+                        $(this).remove();
+                    });
                 }, 3000);
             }
 
@@ -580,17 +598,35 @@
                 });
             }
 
-            function showSaveConfirmation() {
+            // Generic confirmation modal functions
+            let confirmationCallback = null;
+
+            function showConfirmation(message, callback, title = 'Confirm Action') {
+                $('#confirmation-modal-title').text(title);
+                $('#confirmation-modal-message').text(message);
+                confirmationCallback = callback;
                 $('#confirmation-modal').css('display', 'flex');
             }
 
             function closeConfirmationModal() {
                 $('#confirmation-modal').css('display', 'none');
+                confirmationCallback = null;
             }
 
-            function confirmSaveEnvSettings() {
+            function confirmAction() {
+                if (confirmationCallback) {
+                    confirmationCallback();
+                }
                 closeConfirmationModal();
-                saveEnvSettings();
+            }
+
+            // Specific confirmation functions
+            function showSaveConfirmation() {
+                showConfirmation(
+                    'Are you sure you want to update environment settings? This will modify your .env file and may affect your application\'s behavior.',
+                    saveEnvSettings,
+                    'Confirm Changes'
+                );
             }
 
             function saveEnvSettings() {
