@@ -42,6 +42,229 @@ return [
 
     /*
      * |--------------------------------------------------------------------------
+     * | System Information Items
+     * |--------------------------------------------------------------------------
+     * |
+     * | Define which system information items to display and how to retrieve them.
+     * | Each item has a label, icon, and value source (callable or config path).
+     * |
+     */
+    'system_info_items' => [
+        [
+            'key' => 'php_version',
+            'label' => 'PHP Version',
+            'icon' => 'heroicon-o-code-bracket',
+            'value' => fn() => PHP_VERSION,
+        ],
+        [
+            'key' => 'laravel_version',
+            'label' => 'Laravel Version',
+            'icon' => 'heroicon-o-cube',
+            'value' => fn() => app()->version(),
+        ],
+        [
+            'key' => 'environment',
+            'label' => 'Environment',
+            'icon' => 'heroicon-o-server',
+            'value' => fn() => app()->environment(),
+        ],
+        [
+            'key' => 'debug_mode',
+            'label' => 'Debug Mode',
+            'icon' => 'heroicon-o-bug-ant',
+            'value' => fn() => config('app.debug') ? 'Enabled' : 'Disabled',
+        ],
+        [
+            'key' => 'timezone',
+            'label' => 'Timezone',
+            'icon' => 'heroicon-o-clock',
+            'value' => fn() => config('app.timezone'),
+        ],
+        [
+            'key' => 'database_connection',
+            'label' => 'Database',
+            'icon' => 'heroicon-o-circle-stack',
+            'value' => fn() => config('database.default'),
+        ],
+    ],
+
+    /*
+     * |--------------------------------------------------------------------------
+     * | Environment Settings Categories
+     * |--------------------------------------------------------------------------
+     * |
+     * | Structured environment settings categories for the management panel.
+     * | Each category contains metadata and a list of environment variables.
+     * |
+     */
+    'env_settings_categories' => [
+        [
+            'key' => 'app',
+            'name' => 'Application Settings',
+            'icon' => 'heroicon-o-cog-6-tooth',
+            'fields' => [
+                [
+                    'key' => 'APP_NAME',
+                    'label' => 'Application Name',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'APP_ENV',
+                    'label' => 'Environment',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'APP_DEBUG',
+                    'label' => 'Debug Mode',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'APP_TIMEZONE',
+                    'label' => 'Timezone',
+                    'type' => 'text',
+                    'default' => 'UTC'
+                ],
+                [
+                    'key' => 'APP_URL',
+                    'label' => 'Application URL',
+                    'type' => 'text'
+                ],
+            ],
+        ],
+        [
+            'key' => 'database',
+            'name' => 'Database Settings',
+            'icon' => 'heroicon-o-circle-stack',
+            'fields' => [
+                [
+                    'key' => 'DB_CONNECTION',
+                    'label' => 'Connection',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'DB_HOST',
+                    'label' => 'Host',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'DB_PORT',
+                    'label' => 'Port',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'DB_DATABASE',
+                    'label' => 'Database',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'DB_USERNAME',
+                    'label' => 'Username',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'DB_PASSWORD',
+                    'label' => 'Password',
+                    'type' => 'password'
+                ],
+            ],
+        ],
+        [
+            'key' => 'mail',
+            'name' => 'Mail Settings',
+            'icon' => 'heroicon-o-envelope',
+            'fields' => [
+                [
+                    'key' => 'MAIL_MAILER',
+                    'label' => 'Mailer',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'MAIL_HOST',
+                    'label' => 'Host',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'MAIL_PORT',
+                    'label' => 'Port',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'MAIL_USERNAME',
+                    'label' => 'Username',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'MAIL_PASSWORD',
+                    'label' => 'Password',
+                    'type' => 'password'
+                ],
+                [
+                    'key' => 'MAIL_ENCRYPTION',
+                    'label' => 'Encryption',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'MAIL_FROM_ADDRESS',
+                    'label' => 'From Address',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'MAIL_FROM_NAME',
+                    'label' => 'From Name',
+                    'type' => 'text'
+                ],
+            ],
+        ],
+        [
+            'key' => 'cache',
+            'name' => 'Cache Settings',
+            'icon' => 'heroicon-o-bolt',
+            'fields' => [
+                [
+                    'key' => 'CACHE_STORE',
+                    'label' => 'Cache Store',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'CACHE_PREFIX',
+                    'label' => 'Cache Prefix',
+                    'type' => 'text'
+                ],
+            ],
+        ],
+        [
+            'key' => 'queue',
+            'name' => 'Queue Settings',
+            'icon' => 'heroicon-o-queue-list',
+            'fields' => [
+                [
+                    'key' => 'QUEUE_CONNECTION',
+                    'label' => 'Queue Connection',
+                    'type' => 'text'
+                ],
+            ],
+        ],
+        [
+            'key' => 'session',
+            'name' => 'Session Settings',
+            'icon' => 'heroicon-o-key',
+            'fields' => [
+                [
+                    'key' => 'SESSION_DRIVER',
+                    'label' => 'Session Driver',
+                    'type' => 'text'
+                ],
+                [
+                    'key' => 'SESSION_LIFETIME',
+                    'label' => 'Session Lifetime',
+                    'type' => 'text'
+                ],
+            ],
+        ],
+    ],
+
+    /*
+     * |--------------------------------------------------------------------------
      * | Command Sections
      * |--------------------------------------------------------------------------
      * |

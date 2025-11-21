@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Artisan;
 use Symfony\Component\Console\Output\Output;
+use Exception;
 
 class CommandCenterController extends Controller
 {
@@ -15,7 +16,7 @@ class CommandCenterController extends Controller
     public function index()
     {
         $commandSections = config('command-center.command_sections', []);
-        
+
         return view('laravel-command-center::index', [
             'commandSections' => $commandSections,
         ]);
@@ -87,7 +88,7 @@ class CommandCenterController extends Controller
                     ob_flush();
                 }
                 flush();
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 echo 'data: ' . json_encode([
                     'type' => 'error',
                     'message' => $e->getMessage()
@@ -110,24 +111,27 @@ class CommandCenterController extends Controller
     public function getSystemInfo()
     {
         try {
-            $info = [
-                'php_version' => PHP_VERSION,
-                'laravel_version' => app()->version(),
-                'environment' => app()->environment(),
-                'debug_mode' => config('app.debug') ? 'Enabled' : 'Disabled',
-                'timezone' => config('app.timezone'),
-                'database_connection' => config('database.default'),
-            ];
+            $items = config('command-center.system_info_items', []);
+            $info = [];
 
-            return response()->json([
-                'success' => true,
-                'data' => $info,
+            foreach ($items as $item) {
+                $value = is_callable($item['value'])
+                    ? $item['value']()
+                    : $item['value'];
+
+                $info[] = [
+                    'key' => $item['key'],
+                    'label' => $item['label'],
+                    'icon' => $item['icon'],
+                    'value' => $value,
+                ];
+            }
+
+            return view('laravel-command-center::partials.system-info', [
+                'items' => $info,
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'output' => 'Error: ' . $e->getMessage(),
-            ], 500);
+        } catch (Exception $e) {
+            return '<p class="text-red-500 text-center py-4">Error: ' . e($e->getMessage()) . '</p>';
         }
     }
 
@@ -137,52 +141,33 @@ class CommandCenterController extends Controller
     public function getEnvSettings()
     {
         try {
-            $settings = [
-                'app' => [
-                    'APP_NAME' => env('APP_NAME'),
-                    'APP_ENV' => env('APP_ENV'),
-                    'APP_DEBUG' => env('APP_DEBUG', false) ? 'true' : 'false',
-                    'APP_TIMEZONE' => env('APP_TIMEZONE', 'UTC'),
-                    'APP_URL' => env('APP_URL'),
-                ],
-                'database' => [
-                    'DB_CONNECTION' => env('DB_CONNECTION'),
-                    'DB_HOST' => env('DB_HOST'),
-                    'DB_PORT' => env('DB_PORT'),
-                    'DB_DATABASE' => env('DB_DATABASE'),
-                    'DB_USERNAME' => env('DB_USERNAME'),
-                ],
-                'mail' => [
-                    'MAIL_MAILER' => env('MAIL_MAILER'),
-                    'MAIL_HOST' => env('MAIL_HOST'),
-                    'MAIL_PORT' => env('MAIL_PORT'),
-                    'MAIL_USERNAME' => env('MAIL_USERNAME'),
-                    'MAIL_ENCRYPTION' => env('MAIL_ENCRYPTION'),
-                    'MAIL_FROM_ADDRESS' => env('MAIL_FROM_ADDRESS'),
-                    'MAIL_FROM_NAME' => env('MAIL_FROM_NAME'),
-                ],
-                'cache' => [
-                    'CACHE_STORE' => env('CACHE_STORE'),
-                    'CACHE_PREFIX' => env('CACHE_PREFIX'),
-                ],
-                'queue' => [
-                    'QUEUE_CONNECTION' => env('QUEUE_CONNECTION'),
-                ],
-                'session' => [
-                    'SESSION_DRIVER' => env('SESSION_DRIVER'),
-                    'SESSION_LIFETIME' => env('SESSION_LIFETIME'),
-                ],
-            ];
+            $categories = config('command-center.env_settings_categories', []);
+            $settings = [];
 
-            return response()->json([
-                'success' => true,
-                'data' => $settings,
+            foreach ($categories as $category) {
+                $categoryKey = $category['key'];
+                $settings[$categoryKey] = [];
+
+                foreach ($category['fields'] as $field) {
+                    $key = $field['key'];
+                    $default = $field['default'] ?? null;
+                    $value = env($key, $default);
+
+                    // Handle boolean values
+                    if ($key === 'APP_DEBUG') {
+                        $value = $value ? 'true' : 'false';
+                    }
+
+                    $settings[$categoryKey][$key] = $value;
+                }
+            }
+
+            return view('laravel-command-center::partials.env-settings', [
+                'categories' => $categories,
+                'settings' => $settings,
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage(),
-            ], 500);
+        } catch (Exception $e) {
+            return '<p class="text-red-500 text-center py-8">Error: ' . e($e->getMessage()) . '</p>';
         }
     }
 
@@ -228,7 +213,7 @@ class CommandCenterController extends Controller
                 'success' => true,
                 'message' => 'Environment settings updated successfully. Please run "config:clear" for changes to take effect.',
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
@@ -268,7 +253,7 @@ class CommandCenterController extends Controller
                     'status' => 'up',
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
@@ -296,7 +281,7 @@ class CommandCenterController extends Controller
                 'status' => $isDown ? 'down' : 'up',
                 'secret' => $secret,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
@@ -325,7 +310,7 @@ class CommandCenterController extends Controller
                 'success' => true,
                 'content' => $content,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),
@@ -354,7 +339,7 @@ class CommandCenterController extends Controller
                 'success' => true,
                 'message' => 'Environment file updated successfully. Backup created at: ' . basename($backupPath),
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage(),

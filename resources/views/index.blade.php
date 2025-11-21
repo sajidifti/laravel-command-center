@@ -1,4 +1,4 @@
-@extends('laravel-command-center::layout')
+@extends('laravel-command-center::layouts.default')
 
 @section('content')
     <!-- Quick Actions -->
@@ -62,7 +62,7 @@
                     placeholder="Enter secret token" required>
                 <button onclick="generateSecret()"
                     class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-xs rounded transition-colors">
-                    🎲 Generate
+                    Generate
                 </button>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">💡 Tip: Use the generate button for a secure random
@@ -168,30 +168,10 @@
                 Refresh
             </button>
         </div>
-        <div id="system-info" class="grid grid-cols-2 md:grid-cols-3 gap-2">
-            <div class="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <p class="text-xs text-gray-600 dark:text-gray-400">PHP Version</p>
-                <p class="text-sm font-semibold text-gray-800 dark:text-gray-100" id="info-php">Loading...</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <p class="text-xs text-gray-600 dark:text-gray-400">Laravel Version</p>
-                <p class="text-sm font-semibold text-gray-800 dark:text-gray-100" id="info-laravel">Loading...</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <p class="text-xs text-gray-600 dark:text-gray-400">Environment</p>
-                <p class="text-sm font-semibold text-gray-800 dark:text-gray-100" id="info-env">Loading...</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <p class="text-xs text-gray-600 dark:text-gray-400">Debug Mode</p>
-                <p class="text-sm font-semibold text-gray-800 dark:text-gray-100" id="info-debug">Loading...</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <p class="text-xs text-gray-600 dark:text-gray-400">Timezone</p>
-                <p class="text-sm font-semibold text-gray-800 dark:text-gray-100" id="info-timezone">Loading...</p>
-            </div>
-            <div class="bg-gray-50 dark:bg-gray-700 rounded p-2">
-                <p class="text-xs text-gray-600 dark:text-gray-400">Database</p>
-                <p class="text-sm font-semibold text-gray-800 dark:text-gray-100" id="info-database">Loading...</p>
+        <div id="system-info">
+            <div class="flex items-center justify-center py-4">
+                <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                <span class="ml-2 text-sm text-gray-500">Loading system info...</span>
             </div>
         </div>
     </div>
@@ -332,19 +312,13 @@
                 $.ajax({
                     url: "{{ route('command-center.system-info') }}",
                     method: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        if (data.success) {
-                            $('#info-php').text(data.data.php_version);
-                            $('#info-laravel').text(data.data.laravel_version);
-                            $('#info-env').text(data.data.environment);
-                            $('#info-debug').text(data.data.debug_mode);
-                            $('#info-timezone').text(data.data.timezone);
-                            $('#info-database').text(data.data.database_connection);
-                        }
+                    success: function(html) {
+                        $('#system-info').html(html);
                     },
                     error: function(error) {
                         console.error('Error loading system info:', error);
+                        $('#system-info').html(
+                            '<p class="text-red-500 text-center py-4">Error loading system info</p>');
                     }
                 });
             }
@@ -595,93 +569,15 @@
                 $.ajax({
                     url: "{{ route('command-center.env-settings') }}",
                     method: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        if (data.success) {
-                            renderEnvSettings(data.data);
-                        } else {
-                            $container.html('<p class="text-red-500 text-center py-8">Failed to load settings</p>');
-                        }
+                    success: function(html) {
+                        // Inject the HTML returned from server
+                        $container.html(html);
                     },
                     error: function(error) {
                         console.error('Error loading settings:', error);
                         $container.html('<p class="text-red-500 text-center py-8">Error loading settings</p>');
                     }
                 });
-            }
-
-            function renderEnvSettings(settings) {
-                const $container = $('#env-settings-container');
-                $container.html('');
-
-                const categories = {
-                    'app': {
-                        title: 'Application Settings',
-                        icon: '🔧'
-                    },
-                    'database': {
-                        title: 'Database Settings',
-                        icon: '💾'
-                    },
-                    'mail': {
-                        title: 'Mail Settings',
-                        icon: '📧'
-                    },
-                    'cache': {
-                        title: 'Cache Settings',
-                        icon: '⚡'
-                    },
-                    'queue': {
-                        title: 'Queue Settings',
-                        icon: '📋'
-                    },
-                    'session': {
-                        title: 'Session Settings',
-                        icon: '🔑'
-                    }
-                };
-
-                let html = '<div class="space-y-6">';
-
-                Object.keys(categories).forEach(category => {
-                    if (!settings[category]) return;
-
-                    html += `
-                        <div class="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                            <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
-                                <span class="mr-2">${categories[category].icon}</span>
-                                ${categories[category].title}
-                            </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    `;
-
-                    Object.keys(settings[category]).forEach(key => {
-                        const value = settings[category][key] || '';
-                        const isPassword = key.includes('PASSWORD');
-                        const inputType = isPassword ? 'password' : 'text';
-
-                        html += `
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">${key}</label>
-                                <input 
-                                    type="${inputType}"
-                                    id="${key}"
-                                    value="${escapeHtml(String(value))}"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400"
-                                    ${isPassword ? 'placeholder="••••••••"' : ''}
-                                >
-                            </div>
-                        `;
-                    });
-
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                });
-
-                html += '</div>';
-                $container.html(html);
             }
 
             function showSaveConfirmation() {

@@ -9,46 +9,52 @@ use Illuminate\Support\Str;
 class InstallCommand extends Command
 {
     protected $signature = 'command-center:install 
-                            {--with-config : Publish configuration file}
-                            {--with-assets : Publish compiled assets}
-                            {--with-env : Add environment variables to .env}
-                            {--complete : Publish everything with default values (non-interactive)}';
+                            {--only-config : Only publish configuration file}
+                            {--only-assets : Only publish compiled assets}
+                            {--only-env : Only add environment variables to .env}
+                            {--full : Full installation with default values (non-interactive)}';
 
     protected $description = 'Install the Laravel Command Center package (interactive)';
 
-    private bool $isComplete = false;
+    private bool $isFull = false;
 
     public function handle()
     {
         $this->info('Initializing Laravel Command Center installation...');
         $this->newLine();
 
-        $this->isComplete = $this->option('complete');
+        $this->isFull = $this->option('full');
+
+        // Check if any --only-* flag is passed
+        $hasOnlyFlag = $this->option('only-config') || $this->option('only-assets') || $this->option('only-env');
 
         // Create session directory first (always needed)
         $this->createSessionDirectory();
 
         // Determine what to publish based on flags or interactive prompts
-        $publishConfig = $this->shouldPublishConfig();
-        $publishAssets = $this->shouldPublishAssets();
-        $addEnvVars = $this->shouldAddEnvVars();
+        $publishConfig = $this->shouldPublishConfig($hasOnlyFlag);
+        $publishAssets = $this->shouldPublishAssets($hasOnlyFlag);
+        $addEnvVars = $this->shouldAddEnvVars($hasOnlyFlag);
 
         // Execute publishing steps
         if ($publishConfig) {
             $this->publishConfiguration();
-        } else {
+        } elseif (!$hasOnlyFlag) {
+            // Only show instructions if not using --only-* flags
             $this->showConfigInstructions();
         }
 
         if ($publishAssets) {
             $this->publishAssets();
-        } else {
+        } elseif (!$hasOnlyFlag) {
+            // Only show instructions if not using --only-* flags
             $this->showAssetsInstructions();
         }
 
         if ($addEnvVars) {
             $this->addEnvironmentVariables();
-        } else {
+        } elseif (!$hasOnlyFlag) {
+            // Only show instructions if not using --only-* flags
             $this->showEnvInstructions();
         }
 
@@ -80,48 +86,72 @@ class InstallCommand extends Command
     /**
      * Determine if configuration should be published
      */
-    private function shouldPublishConfig(): bool
+    private function shouldPublishConfig(bool $hasOnlyFlag): bool
     {
-        if ($this->option('with-config')) {
+        // If --only-config is passed, publish config
+        if ($this->option('only-config')) {
             return true;
         }
 
-        if ($this->isComplete) {
+        // If any --only-* flag is passed but not --only-config, skip
+        if ($hasOnlyFlag) {
+            return false;
+        }
+
+        // If --full is passed, publish everything
+        if ($this->isFull) {
             return true;
         }
 
+        // Otherwise, ask interactively
         return $this->confirm('Publish configuration file?', true);
     }
 
     /**
      * Determine if assets should be published
      */
-    private function shouldPublishAssets(): bool
+    private function shouldPublishAssets(bool $hasOnlyFlag): bool
     {
-        if ($this->option('with-assets')) {
+        // If --only-assets is passed, publish assets
+        if ($this->option('only-assets')) {
             return true;
         }
 
-        if ($this->isComplete) {
+        // If any --only-* flag is passed but not --only-assets, skip
+        if ($hasOnlyFlag) {
+            return false;
+        }
+
+        // If --full is passed, publish everything
+        if ($this->isFull) {
             return true;
         }
 
+        // Otherwise, ask interactively
         return $this->confirm('Publish compiled assets (CSS/JS)?', true);
     }
 
     /**
      * Determine if environment variables should be added
      */
-    private function shouldAddEnvVars(): bool
+    private function shouldAddEnvVars(bool $hasOnlyFlag): bool
     {
-        if ($this->option('with-env')) {
+        // If --only-env is passed, add env vars
+        if ($this->option('only-env')) {
             return true;
         }
 
-        if ($this->isComplete) {
+        // If any --only-* flag is passed but not --only-env, skip
+        if ($hasOnlyFlag) {
+            return false;
+        }
+
+        // If --full is passed, publish everything
+        if ($this->isFull) {
             return true;
         }
 
+        // Otherwise, ask interactively
         return $this->confirm('Add environment variables to .env (and .env.example)?', true);
     }
 
@@ -183,8 +213,9 @@ class InstallCommand extends Command
         $defaultSecret = Str::random(16);
         $defaultPrefix = "command-center/{$defaultSecret}";
 
-        if ($this->isComplete) {
+        if ($this->isFull) {
             $this->line("Route Prefix: {$defaultPrefix}");
+
             return $defaultPrefix;
         }
 
@@ -201,8 +232,9 @@ class InstallCommand extends Command
      */
     private function getUsername(): string
     {
-        if ($this->isComplete) {
+        if ($this->isFull) {
             $this->line('Username: admin');
+
             return 'admin';
         }
 
@@ -216,8 +248,9 @@ class InstallCommand extends Command
     {
         $defaultPassword = Str::random(16);
 
-        if ($this->isComplete) {
+        if ($this->isFull) {
             $this->line("Password: {$defaultPassword}");
+
             return $defaultPassword;
         }
 
@@ -231,8 +264,9 @@ class InstallCommand extends Command
      */
     private function getSessionLifetime(): string
     {
-        if ($this->isComplete) {
+        if ($this->isFull) {
             $this->line('Session Lifetime: 120 minutes');
+
             return '120';
         }
 
@@ -248,6 +282,7 @@ class InstallCommand extends Command
 
         if (!File::exists($envFile)) {
             $this->warn('.env file not found. Skipping .env update.');
+
             return;
         }
 
@@ -291,6 +326,7 @@ class InstallCommand extends Command
 
         if (!File::exists($envExampleFile)) {
             $this->warn('.env.example file not found. Skipping .env.example update.');
+
             return;
         }
 
@@ -330,7 +366,7 @@ class InstallCommand extends Command
         // Try to get the configured route prefix
         $envFile = base_path('.env');
         $envContent = File::get($envFile);
-        
+
         if (preg_match('/LARAVEL_COMMAND_CENTER_ROUTE_PREFIX=(.+)/', $envContent, $matches)) {
             $prefix = trim($matches[1]);
             $this->info('🌐 Access your Command Center at: ' . url($prefix));

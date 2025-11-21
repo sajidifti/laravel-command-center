@@ -58,13 +58,13 @@ class CommandCenterAuthController extends Controller
         $sessionData = $request->attributes->get('command_center_session', []);
         $errors = new ViewErrorBag();
         $errors->put('default', new MessageBag(['username' => 'Invalid credentials provided.']));
-        
+
         // Convert ViewErrorBag to array for JSON serialization
         $errorsArray = [];
         foreach ($errors->getBags() as $key => $bag) {
             $errorsArray[$key] = $bag->toArray();
         }
-        
+
         $sessionData['errors'] = $errorsArray;
         $sessionData['_old_input'] = $request->only('username');
         $request->attributes->set('command_center_session', $sessionData);
